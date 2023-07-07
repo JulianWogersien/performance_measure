@@ -10,4 +10,4 @@ and then after the code you want to measure either call stop_measure which will 
 if you want to instead replace old samples once you reached the maximum samples you want to instead use the stop_measure_replace_old function
 this approach is more for if you have some sort of loop whereas the closure approach is just generally any sort of performance measuring of some piece of code
 at any point you can get the average the min the max the median the variance the standard deviation and the mode or the samples by calling the appropiate function
-
+You can also save the samples to a file via the save_samples function
