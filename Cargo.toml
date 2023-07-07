@@ -13,3 +13,8 @@ homepage = "https://github.com/coolian1337/performance_measure"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+graplot ={ version = "0.1.22", optional = true}
+
+[features]
+default = ["plot"]
+plot = ["dep:graplot"]

@@ -155,4 +155,16 @@ impl Measurer {
         }
         Ok(())
     }
+
+    /// This function plots the times
+    #[cfg(feature="plot")]
+    pub fn plot(&self) {
+        use graplot::Plot;
+        let samples: Vec<u128> = self.samples.iter().map(|v| v.as_nanos()).collect();
+        let mut plot = Plot::new(samples);
+        plot.set_title("times");
+        plot.set_xlabel("measurements");
+        plot.set_ylabel("time");
+        plot.show();
+    }
 }
