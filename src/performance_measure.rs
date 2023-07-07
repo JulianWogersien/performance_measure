@@ -1,4 +1,4 @@
-use std::time::{Duration, Instant};
+use std::{time::{Duration, Instant}, io::Write};
 
 pub struct Measurer {
     samples: Vec<Duration>,
@@ -140,5 +140,14 @@ impl Measurer {
         f();
         self.stop_measure();
         return self.get_average();
+    }
+
+    /// Saves the samples to a file.
+    pub fn save_samples(&self, path: &str) -> std::io::Result<()> {
+        let mut file = std::fs::File::create(path)?;
+        for sample in &self.samples {
+            file.write_all(format!("{}\n", sample.as_secs_f64()).as_bytes())?;
+        }
+        Ok(())
     }
 }
