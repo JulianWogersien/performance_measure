@@ -7,7 +7,7 @@ authors = ["Julian Wogersien <julian.wogersien@gmail.com>"]
 license = "GPL-3.0-or-later"
 license-file = "LICENSE"
 readme = "README.md"
-keywords = ["performance", "measure", "benchmark", "benchmarking", "time", "timing", "speed"]
+keywords = ["performance", "measure", "benchmark", "benchmarking", "time"]
 homepage = "https://github.com/coolian1337/performance_measure"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
