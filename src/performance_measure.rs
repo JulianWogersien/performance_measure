@@ -48,12 +48,10 @@ impl Measurer {
 
     /// Returns the average of all the samples.
     pub fn get_average(&self) -> Duration {
-        let mut samples = self.samples.clone();
-        samples.retain(|x| *x != Duration::new(0, 0));
 
         let mut sum = Duration::new(0, 0);
-        samples.iter().for_each(|x| sum += *x);
-        return sum / samples.len() as u32;
+        self.samples.iter().for_each(|x| sum += *x);
+        return sum / self.samples.len() as u32;
     }
 
     /// Returns the minimum of all the samples.
