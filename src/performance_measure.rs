@@ -1,5 +1,10 @@
+//! A module that measures the performance of a program. //!
+
+#![warn(missing_docs)]
+
 use std::{time::{Duration, Instant}, io::Write};
 
+/// A struct that measures the performance of a program.
 pub struct Measurer {
     samples: Vec<Duration>,
     max_samples: usize,
