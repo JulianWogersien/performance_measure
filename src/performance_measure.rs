@@ -139,11 +139,15 @@ impl Measurer {
     }
 
     /// measures the performance of given closure and returns the average time it took to execute. You can still get the rest of the values via their respective functions.
-    pub fn measure_closure<F>(&mut self, f: F) -> Duration
-        where F: FnOnce() {
-        self.start_measure();
-        f();
-        self.stop_measure();
+    pub fn measure_closure<F>(&mut self, mut f: F) -> Duration 
+    where
+        F: FnMut(),
+    {
+        for _ in 0..self.max_samples {
+            self.start_measure();
+            f();
+            self.stop_measure();
+        }
         return self.get_average();
     }
 
@@ -160,9 +164,11 @@ impl Measurer {
     #[cfg(feature="plot")]
     pub fn plot(&self) {
         use graplot::Plot;
-        let samples: Vec<u128> = self.samples.iter().map(|v| v.as_millis()).collect();
-        let mut plot = Plot::new(samples);
-        plot.set_title("times");
+        let xvalues: Vec<f64> = (0..self.samples.len()).map(|v| v as f64).collect();
+        let yvales: Vec<f64> = self.samples.iter().map(|v: &Duration| v.as_secs_f64()).collect();
+        let mut plot = Plot::new((xvalues, yvales));
+        plot.set_color(0.0, 255.0, 0.0);
+        plot.set_title("times in secs");
         plot.set_xlabel("measurements");
         plot.set_ylabel("time");
         plot.show();
