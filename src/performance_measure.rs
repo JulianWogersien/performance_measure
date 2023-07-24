@@ -160,7 +160,7 @@ impl Measurer {
     #[cfg(feature="plot")]
     pub fn plot(&self) {
         use graplot::Plot;
-        let samples: Vec<u128> = self.samples.iter().map(|v| v.as_nanos()).collect();
+        let samples: Vec<u128> = self.samples.iter().map(|v| v.as_millis()).collect();
         let mut plot = Plot::new(samples);
         plot.set_title("times");
         plot.set_xlabel("measurements");
