@@ -1,6 +1,6 @@
 [package]
 name = "performance_measure"
-version = "1.1.0"
+version = "1.1.1"
 edition = "2021"
 description = "A library for measuring the performance of Rust code."
 authors = ["Julian Wogersien <julian.wogersien@gmail.com>"]

@@ -1,22 +1,36 @@
 # Performance Measure for Rust
+
 [![Build test](https://github.com/coolian1337/performance_measure/actions/workflows/rust.yml/badge.svg)](https://github.com/coolian1337/performance_measure/actions/workflows/rust.yml)
 [![Crates.io](https://img.shields.io/crates/v/performance_measure.svg)](https://crates.io/crates/performance_measure)
 
-The Performance Measure library in Rust allows you to measure the performance of your code and obtain essential statistics like average, minimum, maximum, median, variance, standard deviation, and mode. This library is particularly useful for optimizing and analyzing the efficiency of your Rust code.
+The Performance Measure library in Rust allows you to measure the performance of
+your code and obtain essential statistics like average, minimum, maximum,
+median, variance, standard deviation, and mode. This library is particularly
+useful for optimizing and analyzing the efficiency of your Rust code.
 
 ## Getting Started
 
 To start measuring performance, follow these steps:
 
-1. Create a new Measurer instance with `Measurer::new(Option::None)`. The optional parameter allows you to control the number of samples the Measurer will keep. The default is 1000 samples.
+1. Create a new Measurer instance with `Measurer::new(Option::None)`. The
+   optional parameter allows you to control the number of samples the Measurer
+   will keep. The default is 1000 samples.
 
 2. You have two options for measuring performance:
-   - **Using Closures**: Call `measure_closure` on the Measurer variable, passing in the closure you want to measure. This function will return the average time it took to execute the closure.
-   - **Manual Measurement**: Call `start_measure` to start the timer, then execute the code you want to measure. After executing the code, call either `stop_measure` to add a sample (if the maximum sample limit hasn't been reached) or `stop_measure_replace_old` to replace old samples once the maximum limit is reached. This method is more suitable for measuring performance inside loops.
+   - **Using Closures**: Call `measure_closure` on the Measurer variable,
+     passing in the closure you want to measure. This function will return the
+     average time it took to execute the closure.
+   - **Manual Measurement**: Call `start_measure` to start the timer, then
+     execute the code you want to measure. After executing the code, call either
+     `stop_measure` to add a sample (if the maximum sample limit hasn't been
+     reached) or `stop_measure_replace_old` to replace old samples once the
+     maximum limit is reached. This method is more suitable for measuring
+     performance inside loops.
 
 ## Available Statistics
 
 You can retrieve various statistics after measuring performance, including:
+
 - Average time
 - Minimum time
 - Maximum time
@@ -26,14 +40,18 @@ You can retrieve various statistics after measuring performance, including:
 - Mode
 - Raw samples
 
-To access these statistics, call the corresponding functions provided by the Measurer instance.
+To access these statistics, call the corresponding functions provided by the
+Measurer instance.
 
 ## Plotting
-You can plot the times using the plot function
+
+You can plot the times using the plot function\
+To use plotting you have to enable the "plot" feature
 
 ## Saving Samples
 
-If you wish to save the measured samples to a file, you can use the `save_samples` function provided by the Measurer instance.
+If you wish to save the measured samples to a file, you can use the
+`save_samples` function provided by the Measurer instance.
 
 ## Example Usage
 
@@ -78,6 +96,8 @@ fn main() {
 
 ## Contributing
 
-If you find any issues or have suggestions for improvements, feel free to contribute to this project by creating pull requests or opening issues.
+If you find any issues or have suggestions for improvements, feel free to
+contribute to this project by creating pull requests or opening issues.
 
-We hope the Performance Measure library proves to be a valuable tool in optimizing and analyzing the performance of your Rust code. Happy coding!
+We hope the Performance Measure library proves to be a valuable tool in
+optimizing and analyzing the performance of your Rust code. Happy coding!
