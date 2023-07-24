@@ -28,6 +28,9 @@ You can retrieve various statistics after measuring performance, including:
 
 To access these statistics, call the corresponding functions provided by the Measurer instance.
 
+## Plotting
+You can plot the times using the plot function
+
 ## Saving Samples
 
 If you wish to save the measured samples to a file, you can use the `save_samples` function provided by the Measurer instance.
@@ -64,6 +67,9 @@ fn main() {
     let variance = measurer.get_variance();
     let std_deviation = measurer.get_std_deviation();
     let mode = measurer.get_mode();
+
+   // Plot the times
+   measurer.plot();
 
     // Save samples to a file
     measurer.save_samples("performance_samples.txt").unwrap();
