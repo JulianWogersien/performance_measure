@@ -47,7 +47,11 @@ impl Measurer {
     /// Starts to measure, use stop_measure to stop measuring.
     pub fn start_measure_named(&mut self, measurement: &str) {
         // possible error due to overwriting
-        self.measurements.insert(measurement.to_owned(), Measurements { name: measurement.to_owned(), samples: Vec::with_capacity(self.max_samples), max_samples: self.max_samples, now: Instant::now() });
+        if self.measurements.contains_key(measurement) {
+            self.measurements.get_mut(measurement).unwrap().now = Instant::now();
+        } else {
+            self.measurements.insert(measurement.to_owned(), Measurements { name: measurement.to_owned(), samples: Vec::with_capacity(self.max_samples), max_samples: self.max_samples, now: Instant::now() });
+        }
     }
 
     /// Stops measuring and replaces the oldest sample with the new one.
@@ -81,8 +85,6 @@ impl Measurer {
         if samples.len() < self.max_samples {
             samples.push(elapsed);
         }
-        println!("max_samples: {}", self.max_samples);
-        println!("samples len: {}", samples.len());
     }
 
     /// Stops measuring and adds the new sample to the list. Does not replace the oldest sample.
@@ -92,8 +94,6 @@ impl Measurer {
         if samples.len() < self.max_samples {
             samples.push(elapsed);
         }
-        println!("max_samples: {}", self.max_samples);
-        println!("samples len named: {}", samples.len());
     }
 
     /// updates the max number of samples to keep.
@@ -303,12 +303,10 @@ impl Measurer {
     where
         F: FnMut(),
     {
-        for i in 0..self.max_samples {
+        for _ in 0..self.max_samples {
             self.start_measure_named(name);
             f();
             self.stop_measure_named(name);
-            println!("measured closure {}", i);
-            println!("len: {}", self.measurements.get(name).unwrap().samples.len());
         }
         return self.get_average_named(name);
     }
@@ -355,9 +353,9 @@ impl Measurer {
         let yvales: Vec<f64> = samples.iter().map(|v: &Duration| v.as_secs_f64()).collect();
         let mut plot = Plot::new((xvalues, yvales));
         plot.set_color(0.0, 255.0, 0.0);
-        plot.set_title("times in secs");
+        plot.set_title("default");
         plot.set_xlabel("measurements");
-        plot.set_ylabel("time");
+        plot.set_ylabel("time in secs");
         plot.show();
     }
 
@@ -368,36 +366,11 @@ impl Measurer {
         use graplot::Plot;
         let xvalues: Vec<f64> = (0..samples.len()).map(|v| v as f64).collect();
         let yvales: Vec<f64> = samples.iter().map(|v: &Duration| v.as_secs_f64()).collect();
-        println!("{:?}", samples[0]);
-        println!("{}", samples.len());
         let mut plot = Plot::new((xvalues, yvales));
         plot.set_color(0.0, 255.0, 0.0);
-        plot.set_title("times in secs");
+        plot.set_title(name);
         plot.set_xlabel("measurements");
-        plot.set_ylabel("time");
-        plot.show();
-    }
-
-    /// This function plots the times
-    #[cfg(feature="plot")]
-    pub fn plot_all(&self) {
-        use graplot::Plot;
-        let xvalues: Vec<Vec<f64>> = self.measurements.iter().map(|v| {
-            v.1.samples.iter().enumerate().map(|i| i.0 as f64).collect()
-        }).collect();
-        let yvalues: Vec<Vec<f64>> = self.measurements.iter().map(|v| {
-            v.1.samples.iter().map(|i| i.as_secs_f64()).collect()
-        }).collect();
-        let mut plot = Plot::default();
-        println!("{}", xvalues.len());
-        println!("{}", yvalues[0].len());
-        xvalues.iter().enumerate().for_each(|v| {
-            plot.add((v.1.clone(), yvalues[v.0].clone()));
-        });
-        plot.set_color(240.0, 240.0, 240.0);
-        plot.set_title("times in secs");
-        plot.set_xlabel("measurements");
-        plot.set_ylabel("time");
+        plot.set_ylabel("time in secs");
         plot.show();
     }
 }
