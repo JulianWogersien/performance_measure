@@ -27,6 +27,22 @@ To start measuring performance, follow these steps:
      maximum limit is reached. This method is more suitable for measuring
      performance inside loops.
 
+## Named Functions for Multiple Measurements
+
+New named functions have been added to allow you to have multiple measurements within one Measurer instance. These named functions allow you to keep track of different measurements separately. Here's how you can use them:
+
+1. **Start Named Measurement**: Call `start_measure_named("measurement_name")` to start a new named measurement. Replace `"measurement_name"` with a descriptive name for your measurement.
+
+2. **Stop Named Measurement**: Call `stop_measure_named("measurement_name")` to stop the named measurement specified by the given name. This will add a sample to the named measurement.
+
+3. **Stop Named Measurement and Replace Old Samples**: Call `stop_measure_replace_old_named("measurement_name")` to stop the named measurement and, if the maximum sample limit hasn't been reached, add a new sample. Once the maximum limit is reached, this function will replace old samples in the named measurement.
+
+4. **Retrieve Named Measurement Statistics**: After stopping a named measurement, you can retrieve various statistics for that specific measurement, just like with the default measurement. Use functions like `get_min_named`, `get_max_named`, `get_median_named`, `get_variance_named`, `get_std_deviation_named`, `get_mode_named`, and `get_samples_named` to access the statistics of the named measurement.
+
+## Default Measurement
+
+The non-named functions now work on the measurement called "default" by default. If you don't explicitly specify a measurement name while using the `start_measure`, `stop_measure`, or `stop_measure_replace_old` functions, they will operate on the "default" measurement.
+
 ## Available Statistics
 
 You can retrieve various statistics after measuring performance, including:
@@ -45,8 +61,7 @@ Measurer instance.
 
 ## Plotting
 
-You can plot the times using the plot function\
-To use plotting you have to enable the "plot" feature
+You can plot the times using the plot function. To use plotting, you have to enable the "plot" feature.
 
 ## Saving Samples
 
@@ -78,22 +93,31 @@ fn main() {
     // For example, a time-consuming function inside a loop
     measurer.stop_measure();
 
-    // Retrieve other statistics if needed
-    let min_time = measurer.get_min();
-    let max_time = measurer.get_max();
-    let median_time = measurer.get_median();
-    let variance = measurer.get_variance();
-    let std_deviation = measurer.get_std_deviation();
-    let mode = measurer.get_mode();
+    // Start a named measurement
+    measurer.start_measure_named("named_measurement");
 
-   // Plot the times
-   measurer.plot();
+    // Code for the named measurement goes here
+    // For example, another time-consuming function inside a loop
+
+    // Stop the named measurement
+    measurer.stop_measure_named("named_measurement");
+
+    // Retrieve statistics for the named measurement
+    let named_min_time = measurer.get_min_named("named_measurement");
+    let named_max_time = measurer.get_max_named("named_measurement");
+    let named_median_time = measurer.get_median_named("named_measurement");
+    let named_variance = measurer.get_variance_named("named_measurement");
+    let named_std_deviation = measurer.get_std_deviation_named("named_measurement");
+    let named_mode = measurer.get_mode_named("named_measurement");
+
+    // Plot the times
+    measurer.plot();
 
     // Save samples to a file
     measurer.save_samples("performance_samples.txt").unwrap();
 }
 ```
-
+  
 ## Contributing
 
 If you find any issues or have suggestions for improvements, feel free to
