@@ -8,7 +8,7 @@ license = "GPL-3.0-or-later"
 license-file = "LICENSE"
 readme = "README.md"
 keywords = ["performance", "measure", "benchmark", "benchmarking", "time"]
-homepage = "https://github.com/coolian1337/performance_measure"
+homepage = "https://github.com/JulianWogersien/performance_measure"
 
 [dependencies]
 graplot = { version = "0.1.22", optional = true }
