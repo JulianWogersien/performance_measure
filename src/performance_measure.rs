@@ -8,9 +8,7 @@ use std::{
 };
 
 struct Measurements {
-    name: String,
     samples: Vec<Duration>,
-    max_samples: usize,
     now: Instant,
 }
 
@@ -31,9 +29,7 @@ impl Measurer {
         let ns = num_samples.unwrap_or(1000);
         let samples_vec = Vec::with_capacity(ns);
         let measurements: Measurements = Measurements {
-            name: "default".to_owned(),
             samples: samples_vec,
-            max_samples: ns,
             now: Instant::now(),
         };
         let mut measurement_map: HashMap<String, Measurements> = HashMap::new();
@@ -56,9 +52,7 @@ pub fn add_measurement(name: &str) {
     let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples_vec = Vec::with_capacity(measurer.max_samples);
     let measurements: Measurements = Measurements {
-        name: name.to_owned(),
         samples: samples_vec,
-        max_samples: measurer.max_samples,
         now: Instant::now(),
     };
     measurer.measurements.insert(name.to_owned(), measurements);
@@ -81,9 +75,7 @@ pub fn start_measure_named(measurement: &str) {
         measurer.measurements.insert(
             measurement.to_owned(),
             Measurements {
-                name: measurement.to_owned(),
                 samples: Vec::with_capacity(max_samples),
-                max_samples,
                 now: Instant::now(),
             },
         );
@@ -395,9 +387,7 @@ where
             measurer.measurements.insert(
                 name.to_owned(),
                 Measurements {
-                    name: name.to_owned(),
                     samples: Vec::with_capacity(max_samples),
-                    max_samples,
                     now: Instant::now(),
                 },
             );
