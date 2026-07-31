@@ -1,127 +1,131 @@
-# Performance Measure for Rust
+# performance_measure
 
 [![Build test](https://github.com/coolian1337/performance_measure/actions/workflows/rust.yml/badge.svg)](https://github.com/coolian1337/performance_measure/actions/workflows/rust.yml)
 [![Crates.io](https://img.shields.io/crates/v/performance_measure.svg)](https://crates.io/crates/performance_measure)
 
-The Performance Measure library in Rust allows you to measure the performance of
-your code and obtain essential statistics like average, minimum, maximum,
-median, variance, standard deviation, and mode. This library is particularly
-useful for optimizing and analyzing the efficiency of your Rust code.
+A tiny helper for timing bits of your Rust code and pulling stats out of the
+results: average, min, max, median, mode, variance, standard deviation The
+raw samples, whatever you need.
+Under the hood it keeps a rolling buffer of samples (1000 by default) so you
+can drop this into a hot loop without it growing forever.
 
-## Getting Started
+## Quick start
 
-To start measuring performance, follow these steps:
+```rust
+use performance_measure::*;
 
-1. Create a new Measurer instance with `Measurer::new(Option::None)`. The
-   optional parameter allows you to control the number of samples the Measurer
-   will keep. The default is 1000 samples.
+fn main() {
+    start_measure();
+    do_something_expensive();
+    stop_measure();
 
-2. You have two options for measuring performance:
-   - **Using Closures**: Call `measure_closure` on the Measurer variable,
-     passing in the closure you want to measure. This function will return the
-     average time it took to execute the closure.
-   - **Manual Measurement**: Call `start_measure` to start the timer, then
-     execute the code you want to measure. After executing the code, call either
-     `stop_measure` to add a sample (if the maximum sample limit hasn't been
-     reached) or `stop_measure_replace_old` to replace old samples once the
-     maximum limit is reached. This method is more suitable for measuring
-     performance inside loops.
+    println!("average: {:?}", get_average());
+    println!("min: {:?}, max: {:?}", get_min(), get_max());
+}
+```
 
-## Named Functions for Multiple Measurements
+Setup is done Automatically when calling any of the functions unless you want to set your own maximum capacity.
 
-New named functions have been added to allow you to have multiple measurements within one Measurer instance. These named functions allow you to keep track of different measurements separately. Here's how you can use them:
+If you'd rather just time a closure:
 
-1. **Start Named Measurement**: Call `start_measure_named("measurement_name")` to start a new named measurement. Replace `"measurement_name"` with a descriptive name for your measurement.
+```rust
+let avg = measure_closure(|| {
+    do_something_expensive();
+});
+```
 
-2. **Stop Named Measurement**: Call `stop_measure_named("measurement_name")` to stop the named measurement specified by the given name. This will add a sample to the named measurement.
+`measure_closure` runs your closure to fill the sample buffer (so up to the maximum capacity), and hands back the average. You can still pull `min`,
+`max`, `median`, etc. afterward — it fills the same sample buffer as
+`start_measure`/`stop_measure` would.
 
-3. **Stop Named Measurement and Replace Old Samples**: Call `stop_measure_replace_old_named("measurement_name")` to stop the named measurement and, if the maximum sample limit hasn't been reached, add a new sample. Once the maximum limit is reached, this function will replace old samples in the named measurement.
+## Naming measurements
 
-4. **Retrieve Named Measurement Statistics**: After stopping a named measurement, you can retrieve various statistics for that specific measurement, just like with the default measurement. Use functions like `get_min_named`, `get_max_named`, `get_median_named`, `get_variance_named`, `get_std_deviation_named`, `get_mode_named`, and `get_samples_named` to access the statistics of the named measurement.
+`start_measure` / `stop_measure` and friends all operate on one shared
+bucket called `"default"`. If you want to track more than one thing at once for example, parsing vs rendering use the `_named` versions and give each its own name:
 
-## Default Measurement
+```rust
+start_measure_named("parsing");
+parse_input();
+stop_measure_named("parsing");
 
-The non-named functions now work on the measurement called "default" by default. If you don't explicitly specify a measurement name while using the `start_measure`, `stop_measure`, or `stop_measure_replace_old` functions, they will operate on the "default" measurement.
+start_measure_named("rendering");
+render_frame();
+stop_measure_named("rendering");
 
-## Available Statistics
+println!("parse avg: {:?}", get_average_named("parsing"));
+println!("render avg: {:?}", get_average_named("rendering"));
+```
 
-You can retrieve various statistics after measuring performance, including:
+You don't need to explicitly create a named measurement first
+`start_measure_named` will create it the first time it sees a new name. If
+you want an empty bucket before you start timing (or want to
+wipe one clean), `add_measurement("parsing")` does that.
 
-- Average time
-- Minimum time
-- Maximum time
-- Median time
-- Variance
-- Standard deviation
-- Mode
-- Raw samples
+## Two ways to stop a measurement
 
-To access these statistics, call the corresponding functions provided by the
-Measurer instance.
+- `stop_measure()` / `stop_measure_named(name)` — adds a new sample, but
+  once you hit the capacity limit it just stops recording.
+- `stop_measure_replace_old()` / `stop_measure_replace_old_named(name)` —
+  once full, this replaces the oldest sample with the new one. Use this
+  for stuff you're measuring in a loop, so your stats stay a rolling
+  window of recent runs instead of freezing at whatever happened first.
+
+## Stats
+
+Once you've got samples in a bucket, these are all available (each has a
+`_named(name)` version too):
+
+- `get_average()`
+- `get_min()` / `get_max()`
+- `get_median()`
+- `get_mode()`
+- `get_variance()`
+- `get_std_dev()`
+- `get_samples()` the raw `Vec<Duration>`, if you want to do your own math
+
+## Capacity
+
+By default each measurement keeps up to 1000 samples. If you want something
+different, call `init(n)` once, before doing anything else:
+
+```rust
+init(200); // keep the last 200 samples per measurement
+```
+
+One thing to watch out for: the capacity is set globally, the first time
+anything touches the measurer, whether that's an explicit `init()` call or
+just the first `start_measure()` you happen to call. Whichever one runs
+first wins, and it can't be changed afterward. So if you care about a
+specific capacity, call `init()` before any measuring happen.
+
+## Resetting
+
+If you want to clear out a measurement and start fresh, `reset_measurement()`
+(or `reset_measurement_named(name)`) will drop it entirely.
+
+## Saving samples to disk
+
+```rust
+save_samples("default_samples.txt")?;
+save_samples_named("parsing_samples.txt", "parsing")?;
+
+// or dump everything you've recorded so far, all measurements at once
+save_samples_all("all_samples.txt")?;
+```
+
+Each line in the file is one sample, in seconds, as a float.
 
 ## Plotting
 
-You can plot the times using the plot function. To use plotting, you have to enable the "plot" feature.
+There's a `plot()` / `plot_named(name)` function that pops up a quick plot
+of your samples, but it's behind the `plot` feature flag since it pulls in
+a plotting dependency you might not want:
 
-## Saving Samples
-
-If you wish to save the measured samples to a file, you can use the
-`save_samples` function provided by the Measurer instance.
-
-## Example Usage
-
-Here's an example of how to use the Performance Measure library:
-
-```rust
-use performance_measure::Measurer;
-
-fn main() {
-    // Create a Measurer with the default number of samples (1000)
-    let mut measurer = Measurer::new(None);
-
-    // Using closure measurement
-    let average_time = measurer.measure_closure(|| {
-        // Code to be measured goes here
-        // For example, a time-consuming function or a loop
-    });
-
-    println!("Average time: {:.2} ms", average_time);
-
-    // Manual measurement using start_measure and stop_measure
-    measurer.start_measure();
-    // Code to be measured goes here
-    // For example, a time-consuming function inside a loop
-    measurer.stop_measure();
-
-    // Start a named measurement
-    measurer.start_measure_named("named_measurement");
-
-    // Code for the named measurement goes here
-    // For example, another time-consuming function inside a loop
-
-    // Stop the named measurement
-    measurer.stop_measure_named("named_measurement");
-
-    // Retrieve statistics for the named measurement
-    let named_min_time = measurer.get_min_named("named_measurement");
-    let named_max_time = measurer.get_max_named("named_measurement");
-    let named_median_time = measurer.get_median_named("named_measurement");
-    let named_variance = measurer.get_variance_named("named_measurement");
-    let named_std_deviation = measurer.get_std_deviation_named("named_measurement");
-    let named_mode = measurer.get_mode_named("named_measurement");
-
-    // Plot the times
-    measurer.plot();
-
-    // Save samples to a file
-    measurer.save_samples("performance_samples.txt").unwrap();
-}
+```toml
+[dependencies]
+performance_measure = { version = "...", features = ["plot"] }
 ```
-  
+
 ## Contributing
 
-If you find any issues or have suggestions for improvements, feel free to
-contribute to this project by creating pull requests or opening issues.
-
-We hope the Performance Measure library proves to be a valuable tool in
-optimizing and analyzing the performance of your Rust code. Happy coding!
+Found a bug or have an idea for a feature? Issues and PRs are welcome.

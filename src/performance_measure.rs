@@ -53,7 +53,7 @@ pub fn init(n: usize) {
 
 /// Adds new measurement
 pub fn add_measurement(name: &str) {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples_vec = Vec::with_capacity(measurer.max_samples);
     let measurements: Measurements = Measurements {
         name: name.to_owned(),
@@ -66,13 +66,13 @@ pub fn add_measurement(name: &str) {
 
 /// Starts to measure, use stop_measure to stop measuring.
 pub fn start_measure() {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     measurer.measurements.get_mut("default").unwrap().now = Instant::now();
 }
 
 /// Starts to measure, use stop_measure to stop measuring.
 pub fn start_measure_named(measurement: &str) {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let max_samples = measurer.max_samples;
     // possible error due to overwriting
     if measurer.measurements.contains_key(measurement) {
@@ -92,7 +92,7 @@ pub fn start_measure_named(measurement: &str) {
 
 /// Stops measuring and replaces the oldest sample with the new one.
 pub fn stop_measure_replace_old() {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let elapsed = measurer
         .measurements
         .get_mut("default")
@@ -111,7 +111,7 @@ pub fn stop_measure_replace_old() {
 
 /// Stops measuring and replaces the oldest sample with the new one.
 pub fn stop_measure_replace_old_named(name: &str) {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let elapsed = measurer.measurements.get_mut(name).unwrap().now.elapsed();
     let max_samples = measurer.max_samples;
     let samples = &mut measurer.measurements.get_mut(name).unwrap().samples;
@@ -125,7 +125,7 @@ pub fn stop_measure_replace_old_named(name: &str) {
 
 /// Stops measuring and adds the new sample to the list. Does not replace the oldest sample.
 pub fn stop_measure() {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let elapsed = measurer.measurements.get("default").unwrap().now.elapsed();
     let max_samples = measurer.max_samples;
     let samples = &mut measurer.measurements.get_mut("default").unwrap().samples;
@@ -136,7 +136,7 @@ pub fn stop_measure() {
 
 /// Stops measuring and adds the new sample to the list. Does not replace the oldest sample.
 pub fn stop_measure_named(name: &str) {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let elapsed = measurer.measurements.get(name).unwrap().now.elapsed();
     let max_samples = measurer.max_samples;
     let samples = &mut measurer.measurements.get_mut(name).unwrap().samples;
@@ -147,7 +147,7 @@ pub fn stop_measure_named(name: &str) {
 
 /// Returns the average of all the samples.
 pub fn get_average() -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get("default").unwrap().samples;
     let sum: Duration = samples.iter().cloned().sum();
     sum / samples.len() as u32
@@ -155,7 +155,7 @@ pub fn get_average() -> Duration {
 
 /// Returns the average of all the samples.
 pub fn get_average_named(name: &str) -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get(name).unwrap().samples;
     let sum: Duration = samples.iter().sum();
     sum / samples.len() as u32
@@ -163,7 +163,7 @@ pub fn get_average_named(name: &str) -> Duration {
 
 /// Returns the minimum of all the samples.
 pub fn get_min() -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get("default").unwrap().samples;
     samples
         .iter()
@@ -174,7 +174,7 @@ pub fn get_min() -> Duration {
 
 /// Returns the minimum of all the samples.
 pub fn get_min_named(name: &str) -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get(name).unwrap().samples;
     samples
         .iter()
@@ -185,7 +185,7 @@ pub fn get_min_named(name: &str) -> Duration {
 
 /// Returns the maximum of all the samples.
 pub fn get_max() -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get("default").unwrap().samples;
     samples
         .iter()
@@ -196,7 +196,7 @@ pub fn get_max() -> Duration {
 
 /// Returns the maximum of all the samples.
 pub fn get_max_named(name: &str) -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get(name).unwrap().samples;
     samples
         .iter()
@@ -207,7 +207,7 @@ pub fn get_max_named(name: &str) -> Duration {
 
 /// Returns the median of all the samples.
 pub fn get_median() -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let mut samples = measurer
         .measurements
         .get("default")
@@ -224,7 +224,7 @@ pub fn get_median() -> Duration {
 
 /// Returns the median of all the samples.
 pub fn get_median_named(name: &str) -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let mut samples = measurer.measurements.get(name).unwrap().samples.clone();
     samples.sort();
     if samples.len().is_multiple_of(2) {
@@ -236,7 +236,7 @@ pub fn get_median_named(name: &str) -> Duration {
 
 /// Returns the mode of all the samples.
 pub fn get_mode() -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get("default").unwrap().samples;
     let mut map = std::collections::HashMap::new();
     samples.iter().for_each(|x| {
@@ -256,7 +256,7 @@ pub fn get_mode() -> Duration {
 
 /// Returns the mode of all the samples.
 pub fn get_mode_named(name: &str) -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get(name).unwrap().samples;
     let mut map = std::collections::HashMap::new();
     samples.iter().for_each(|x| {
@@ -276,7 +276,7 @@ pub fn get_mode_named(name: &str) -> Duration {
 
 /// Returns the standard deviation of all the samples.
 pub fn get_std_dev() -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get("default").unwrap().samples;
     let mean = samples.iter().cloned().sum::<Duration>() / samples.len() as u32;
     let mean_secs = mean.as_secs_f64();
@@ -293,7 +293,7 @@ pub fn get_std_dev() -> Duration {
 
 /// Returns the standard deviation of all the samples.
 pub fn get_std_dev_named(name: &str) -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get(name).unwrap().samples;
     let mean = samples.iter().cloned().sum::<Duration>() / samples.len() as u32;
     let mean_secs = mean.as_secs_f64();
@@ -310,7 +310,7 @@ pub fn get_std_dev_named(name: &str) -> Duration {
 
 /// Returns the variance of all the samples.
 pub fn get_variance() -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get("default").unwrap().samples;
     let mean = samples.iter().cloned().sum::<Duration>() / samples.len() as u32;
     let mean_secs = mean.as_secs_f64();
@@ -327,7 +327,7 @@ pub fn get_variance() -> Duration {
 
 /// Returns the variance of all the samples.
 pub fn get_variance_named(name: &str) -> Duration {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get(name).unwrap().samples;
     let mean = samples.iter().cloned().sum::<Duration>() / samples.len() as u32;
     let mean_secs = mean.as_secs_f64();
@@ -344,7 +344,7 @@ pub fn get_variance_named(name: &str) -> Duration {
 
 /// Returns the samples.
 pub fn get_samples() -> Vec<Duration> {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     measurer
         .measurements
         .get("default")
@@ -355,7 +355,7 @@ pub fn get_samples() -> Vec<Duration> {
 
 /// Returns the samples.
 pub fn get_samples_named(name: &str) -> Vec<Duration> {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     measurer.measurements.get(name).unwrap().samples.clone()
 }
 
@@ -364,7 +364,7 @@ pub fn measure_closure<F>(mut f: F) -> Duration
 where
     F: FnMut(),
 {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     for _ in 0..measurer.max_samples {
         measurer.measurements.get_mut("default").unwrap().now = Instant::now();
         f();
@@ -385,7 +385,7 @@ pub fn measure_closure_named<F>(mut f: F, name: &str) -> Duration
 where
     F: FnMut(),
 {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     for _ in 0..measurer.max_samples {
         let max_samples = measurer.max_samples;
         // possible error due to overwriting
@@ -417,7 +417,7 @@ where
 
 /// Saves the samples to a file.
 pub fn save_samples(path: &str) -> std::io::Result<()> {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get("default").unwrap().samples;
     let mut file = std::fs::File::create(path)?;
     for sample in samples {
@@ -428,7 +428,7 @@ pub fn save_samples(path: &str) -> std::io::Result<()> {
 
 /// Saves the samples to a file.
 pub fn save_samples_named(path: &str, name: &str) -> std::io::Result<()> {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get(name).unwrap().samples;
     let mut file = std::fs::File::create(path)?;
     for sample in samples {
@@ -439,7 +439,7 @@ pub fn save_samples_named(path: &str, name: &str) -> std::io::Result<()> {
 
 /// Saves the samples to a file.
 pub fn save_samples_all(path: &str) -> std::io::Result<()> {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let mut file = std::fs::File::create(path)?;
     measurer.measurements.iter().for_each(|v| {
         file.write_all(v.0.clone().as_bytes()).unwrap();
@@ -453,19 +453,19 @@ pub fn save_samples_all(path: &str) -> std::io::Result<()> {
 }
 
 pub fn reset_measurement() {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     measurer.measurements.remove("default");
 }
 
 pub fn reset_measurement_named(name: &str) {
-    let mut measurer = get_measurer(None).lock().unwrap();
+    let mut measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     measurer.measurements.remove(name);
 }
 
 /// This function plots the times
 #[cfg(feature = "plot")]
 pub fn plot() {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get("default").unwrap().samples;
     use graplot::Plot;
     let xvalues: Vec<f64> = (0..samples.len()).map(|v| v as f64).collect();
@@ -481,7 +481,7 @@ pub fn plot() {
 /// This function plots the times
 #[cfg(feature = "plot")]
 pub fn plot_named(name: &str) {
-    let measurer = get_measurer(None).lock().unwrap();
+    let measurer = get_measurer(None).lock().unwrap_or_else(|e| e.into_inner());
     let samples = &measurer.measurements.get(name).unwrap().samples;
     use graplot::Plot;
     let xvalues: Vec<f64> = (0..samples.len()).map(|v| v as f64).collect();
