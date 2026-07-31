@@ -25,6 +25,11 @@ jobs:
       - name: Cache cargo registry & build artifacts
         uses: Swatinem/rust-cache@v2
 
+      - name: Install X11/OpenGL dev libraries (for the `plot` feature)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev libx11-dev libxi-dev
+
       - name: Check formatting
         run: cargo fmt --all -- --check
 
